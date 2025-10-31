@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(uuid())
+  name String 
+  email String @unique
+  password String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  roles         UserTenantRole[]
+  refreshTokens RefreshToken[]
+  ownedTenants  Tenant[]       @relation("TenantOwner")
+
+  @@map("users")
+}
+
+model Tenant {
+  id String @id @default(uuid())
+  name String
+  code String @unique
+  ownerId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  delatedAt DateTime?
+
+  users   UserTenantRole[]
+  owner   User               @relation("TenantOwner", fields: [ownerId], references: [id])
+
+  @@map("tenants")
+}
+
+model UserTenantRole {
+  id       String      @id @default(uuid())
+  userId   String
+  tenantId String
+  role     TenantRole
+
+  user     User        @relation(fields: [userId], references: [id])
+  tenant   Tenant      @relation(fields: [tenantId], references: [id])
+
+  @@unique([userId, tenantId])
+  @@map("user_tenant_roles") 
+}
+
+enum TenantRole {
+  TENANT_OWNER
+  TENANT_ADMIN
+  TENANT_MEMBER
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  token     String    @unique
+  userId    String
+  createdAt DateTime  @default(now())
+  expiresAt DateTime
+
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@map("refresh_tokens") 
+}
