@@ -5,6 +5,9 @@ import { GetUserUseCase } from './application/get-user.usecase';
 import { UsersController } from './users.controller';
 import { IUserRepository } from './domain/user.repository.interface';
 import { PrismaUserRepository } from './infra/prisma-user.repository';
+import { GetAllUserUseCase } from './application/getAll-user.usecase';
+import { RemoveUserUseCase } from './application/remove-user.usecase';
+import { UpdateUserUseCase } from './application/update-user.usecase';
 
 @Module({
   imports: [DatabaseModule],
@@ -12,6 +15,9 @@ import { PrismaUserRepository } from './infra/prisma-user.repository';
   providers: [
     CreateUserUseCase,
     GetUserUseCase,
+    GetAllUserUseCase,
+    RemoveUserUseCase,
+    UpdateUserUseCase,
     {
       provide: IUserRepository,
       useClass: PrismaUserRepository,

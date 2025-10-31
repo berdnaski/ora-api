@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../core/database/prisma.service';
 import { User } from '../domain/user.entity';
-import { IUserRepository } from '../domain/user.repository.interface';
+import { IUserRepository, UserUpdateData } from '../domain/user.repository.interface';
 import { RefreshToken } from '../domain/refresh-token.entity';
 
 @Injectable()
@@ -53,10 +53,18 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async saveRefreshToken(userId: string, token: string): Promise<RefreshToken> {
-    const created = await this.prisma.refreshToken.create({
-      data: {
-        userId,
-        token,
+    const created = await this.prisma.refreshToken.upsert({
+      where: { 
+        userId: userId 
+      },
+      update: {
+        token: token,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        createdAt: new Date() 
+      },
+      create: {
+        userId: userId,
+        token: token,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       },
     });
@@ -81,5 +89,46 @@ export class PrismaUserRepository implements IUserRepository {
       createdAt: found.createdAt,
       expiresAt: found.expiresAt,
     };
+  }
+
+  async findAll(): Promise<User[]> {
+    const users = await this.prisma.user.findMany();
+
+    return users.map(
+      (user) =>
+        new User(
+          user.id,
+          user.name,
+          user.email,
+          user.password,
+          user.createdAt,
+          user.updatedAt,
+        ),
+    );
+  }
+
+  async remove(id: string): Promise<void> {
+    await this.prisma.user.delete({
+      where: { id },
+    });
+  }
+
+  async update(id: string, data: UserUpdateData): Promise<User> {
+    const updated = await this.prisma.user.update({
+      where: { id },
+      data: {
+        ...data,
+        updatedAt: new Date(),
+      }
+    });
+    
+    return new User(
+      updated.id,
+      updated.name,
+      updated.email,
+      updated.password,
+      updated.createdAt,
+      updated.updatedAt,
+    );
   }
 }
