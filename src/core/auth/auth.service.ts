@@ -42,19 +42,20 @@ export class AuthService {
   }
 
   async login(user: User) {
-    const payload = {
-      email: user.email,
-      sub: user.id,
-    };
-    const access_token = await this.jwtService.signAsync(payload);
+      const payload = {
+        sub: user.id, 
+        email: user.email,
+      };
 
-    const refresh_token = await this.jwtService.signAsync(payload, {
-      expiresIn: '7d',
-    });
+      const access_token = await this.jwtService.signAsync(payload);
 
-    await this.userRepository.saveRefreshToken(user.id, refresh_token);
+      const refresh_token = await this.jwtService.signAsync(payload, {
+        expiresIn: '7d',
+      });
 
-    return { access_token, refresh_token };
+      await this.userRepository.saveRefreshToken(user.id, refresh_token);
+
+      return { access_token, refresh_token };
   }
 
   async refreshToken(token: string) {
@@ -70,8 +71,8 @@ export class AuthService {
     }
 
     const payload = {
+      id: user.id,
       email: user.email,
-      sub: user.id,
     };
 
     const access_token = await this.jwtService.signAsync(payload);

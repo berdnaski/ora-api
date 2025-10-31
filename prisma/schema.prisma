@@ -17,7 +17,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   roles         UserTenantRole[]
-  refreshTokens RefreshToken[]
+  refreshToken RefreshToken?
   ownedTenants  Tenant[]       @relation("TenantOwner")
 
   @@map("users")
@@ -60,11 +60,11 @@ enum TenantRole {
 model RefreshToken {
   id        String    @id @default(uuid())
   token     String    @unique
-  userId    String
+  userId    String @unique
   createdAt DateTime  @default(now())
   expiresAt DateTime
-
-  user      User      @relation(fields: [userId], references: [id])
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("refresh_tokens") 
 }
