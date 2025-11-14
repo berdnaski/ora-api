@@ -5,7 +5,7 @@ import { GetUserUseCase } from './application/get-user.usecase';
 import { UsersController } from './users.controller';
 import { IUserRepository } from './domain/user.repository.interface';
 import { PrismaUserRepository } from './infra/prisma-user.repository';
-import { GetAllUserUseCase } from './application/getAll-user.usecase';
+import { GetAllUserUseCase } from './application/get-all-user.usecase';
 import { RemoveUserUseCase } from './application/remove-user.usecase';
 import { UpdateUserUseCase } from './application/update-user.usecase';
 

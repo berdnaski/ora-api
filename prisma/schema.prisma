@@ -13,48 +13,45 @@ model User {
   name String 
   email String @unique
   password String
+
+  photo String?
+  churchId String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  roles         UserTenantRole[]
+  profile UserProfile?
+  church    Church? @relation(fields: [churchId], references: [id])
+
   refreshToken RefreshToken?
-  ownedTenants  Tenant[]       @relation("TenantOwner")
 
   @@map("users")
 }
 
-model Tenant {
+model UserProfile {
   id String @id @default(uuid())
-  name String
-  code String @unique
-  ownerId String
+  userId String @unique
+  phone String?
+  address String?
+  birthDate String?
+  baptismDate DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  delatedAt DateTime?
 
-  users   UserTenantRole[]
-  owner   User               @relation("TenantOwner", fields: [ownerId], references: [id])
-
-  @@map("tenants")
+  user          User     @relation(fields: [userId], references: [id])
 }
 
-model UserTenantRole {
-  id       String      @id @default(uuid())
-  userId   String
-  tenantId String
-  role     TenantRole
+model Church {
+  id        String   @id @default(uuid())
+  name      String
+  code      String   @unique
+  photo     String?
 
-  user     User        @relation(fields: [userId], references: [id])
-  tenant   Tenant      @relation(fields: [tenantId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@unique([userId, tenantId])
-  @@map("user_tenant_roles") 
-}
-
-enum TenantRole {
-  TENANT_OWNER
-  TENANT_ADMIN
-  TENANT_MEMBER
+  users     User[]
 }
 
 model RefreshToken {
